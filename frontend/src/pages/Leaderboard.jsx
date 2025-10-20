@@ -1,0 +1,190 @@
+import { useState, useEffect } from 'react';
+import { getLeaderboard, getCurrentWeek } from '../services/api';
+import './Leaderboard.css';
+
+function Leaderboard() {
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentWeek, setCurrentWeek] = useState(1);
+  const [filters, setFilters] = useState({
+    house: 'all',
+    week: 'all'
+  });
+  const [searchEmail, setSearchEmail] = useState('');
+
+  useEffect(() => {
+    fetchCurrentWeek();
+  }, []);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [filters]);
+
+  const fetchCurrentWeek = async () => {
+    try {
+      const res = await getCurrentWeek();
+      setCurrentWeek(res.data.data.currentWeek);
+    } catch (error) {
+      console.error('Error fetching current week:', error);
+    }
+  };
+
+  const fetchLeaderboard = async () => {
+    try {
+      setLoading(true);
+      const res = await getLeaderboard(filters.house, filters.week);
+      setLeaderboard(res.data.data.leaderboard);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleHouseChange = (e) => {
+    setFilters({ ...filters, house: e.target.value });
+  };
+
+  const handleWeekChange = (e) => {
+    setFilters({ ...filters, week: e.target.value });
+  };
+
+  const filteredLeaderboard = leaderboard.filter(user => 
+    user.email.toLowerCase().includes(searchEmail.toLowerCase()) ||
+    user.name.toLowerCase().includes(searchEmail.toLowerCase())
+  );
+
+  const getRankClass = (rank) => {
+    if (rank === 1) return 'rank-gold';
+    if (rank === 2) return 'rank-silver';
+    if (rank === 3) return 'rank-bronze';
+    return '';
+  };
+
+  return (
+    <div className="leaderboard-container">
+      <div className="leaderboard-header">
+        <h1>🏆 Leaderboard</h1>
+        <p className="subtitle">Track your progress and compete with peers</p>
+      </div>
+
+      <div className="filters-section">
+        <div className="filter-group">
+          <label>House</label>
+          <select value={filters.house} onChange={handleHouseChange}>
+            <option value="all">All Houses</option>
+            <option value="1">House 1</option>
+            <option value="2">House 2</option>
+            <option value="3">House 3</option>
+            <option value="4">House 4</option>
+            <option value="5">House 5</option>
+            <option value="6">House 6</option>
+            <option value="7">House 7</option>
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label>Week</label>
+          <select value={filters.week} onChange={handleWeekChange}>
+            <option value="all">All Weeks</option>
+            {[1, 2, 3, 4].map(week => (
+              <option 
+                key={week} 
+                value={week}
+                disabled={week > currentWeek}
+              >
+                Week {week} {week > currentWeek ? '(Upcoming)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="filter-group search-group">
+          <label>Search</label>
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchEmail}
+            onChange={(e) => setSearchEmail(e.target.value)}
+            className="search-input"
+          />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="loading">Loading leaderboard...</div>
+      ) : (
+        <div className="leaderboard-table-container">
+          <table className="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>House</th>
+                <th>Badges</th>
+                <th>Labs</th>
+                <th>Total</th>
+                <th>Profile</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredLeaderboard.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="no-data">
+                    No participants found
+                  </td>
+                </tr>
+              ) : (
+                filteredLeaderboard.map((user) => (
+                  <tr key={user._id} className={getRankClass(user.rank)}>
+                    <td className="rank-cell">
+                      <span className="rank-badge">{user.rank}</span>
+                    </td>
+                    <td className="name-cell">
+                      <div className="user-name">{user.name}</div>
+                      <div className="user-email">{user.email}</div>
+                    </td>
+                    <td>
+                      <span className="house-badge">House {user.house_id}</span>
+                    </td>
+                    <td>
+                      <span className="stat-badge badges">
+                        🏆 {user.badges_completed}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="stat-badge labs">
+                        🎮 {user.labs_completed}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="total-badge">
+                        {user.total_completed}
+                      </span>
+                    </td>
+                    <td>
+                      <a 
+                        href={user.profileUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="profile-link"
+                      >
+                        View →
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="leaderboard-footer">
+        <p>Showing {filteredLeaderboard.length} participant(s)</p>
+      </div>
+    </div>
+  );
+}
+
+export default Leaderboard;
