@@ -1,0 +1,28 @@
+{
+  "name": "gdgoc-leaderboard-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js",
+    "setup": "node scripts/setupdatabase.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gdgoc",
+    "leaderboard",
+    "google-cloud"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "GDGOC Study Jams Leaderboard Backend",
+    "dependencies": {
+      "cors": "^2.8.5",
+      "dotenv": "^17.2.3",
+      "express": "^5.1.0",
+      "mongoose": "^8.19.1",
+      "multer": "^1.4.5-lts.1",
+      "nodemon": "^3.1.10"
+    }
+}
