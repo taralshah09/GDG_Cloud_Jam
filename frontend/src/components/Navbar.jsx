@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
+import gdgLogo from '../images/gdg_logo.png';
 
 function Navbar() {
   const location = useLocation();
@@ -12,7 +13,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          <span className="logo-icon">☁️</span>
+          <img src={gdgLogo} alt="GDG Logo" className="logo-icon" />
           <span className="logo-text">GDGOC Study Jams</span>
         </Link>
         

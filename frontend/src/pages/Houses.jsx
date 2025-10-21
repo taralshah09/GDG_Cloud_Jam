@@ -24,6 +24,19 @@ function Houses() {
     }
   };
 
+  const getHouseName = (houseId) => {
+    const houseNames = {
+      1: 'Alpha',
+      2: 'Bravo', 
+      3: 'Charlie',
+      4: 'Delta',
+      5: 'Enigma',
+      6: 'Falcon',
+      7: 'Gamma'
+    };
+    return houseNames[houseId] || `House ${houseId}`;
+  };
+
   const getHouseColor = (houseId) => {
     const colors = [
       '#FF6B6B', // Red
@@ -68,7 +81,7 @@ function Houses() {
               style={{ backgroundColor: getHouseColor(house.house_id) }}
             >
               <div className="house-rank">#{index + 1}</div>
-              <div className="house-name">House {house.house_id}</div>
+              <div className="house-name">{getHouseName(house.house_id)}</div>
             </div>
 
             <div className="house-stats">

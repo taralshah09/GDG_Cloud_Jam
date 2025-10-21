@@ -28,7 +28,9 @@
 }
 
 .logo-icon {
-  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
 }
 
 .logo-text {

@@ -12,6 +12,19 @@ function Leaderboard() {
   });
   const [searchEmail, setSearchEmail] = useState('');
 
+  const getHouseName = (houseId) => {
+    const houseNames = {
+      1: 'Alpha',
+      2: 'Bravo', 
+      3: 'Charlie',
+      4: 'Delta',
+      5: 'Enigma',
+      6: 'Falcon',
+      7: 'Gamma'
+    };
+    return houseNames[houseId] || `House ${houseId}`;
+  };
+
   useEffect(() => {
     fetchCurrentWeek();
   }, []);
@@ -73,13 +86,13 @@ function Leaderboard() {
           <label>House</label>
           <select value={filters.house} onChange={handleHouseChange}>
             <option value="all">All Houses</option>
-            <option value="1">House 1</option>
-            <option value="2">House 2</option>
-            <option value="3">House 3</option>
-            <option value="4">House 4</option>
-            <option value="5">House 5</option>
-            <option value="6">House 6</option>
-            <option value="7">House 7</option>
+            <option value="1">Alpha</option>
+            <option value="2">Bravo</option>
+            <option value="3">Charlie</option>
+            <option value="4">Delta</option>
+            <option value="5">Enigma</option>
+            <option value="6">Falcon</option>
+            <option value="7">Gamma</option>
           </select>
         </div>
 
@@ -145,7 +158,7 @@ function Leaderboard() {
                       <div className="user-email">{user.email}</div>
                     </td>
                     <td>
-                      <span className="house-badge">House {user.house_id}</span>
+                      <span className="house-badge">{getHouseName(user.house_id)}</span>
                     </td>
                     <td>
                       <span className="stat-badge badges">
