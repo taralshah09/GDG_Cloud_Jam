@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL;
 const FRONTEND_URL =
-  process.env.FRONTEND_URL || "https://gdg-cloud-jam.vercel.app/";
+  process.env.FRONTEND_URL || "https://gdg-cloud-jam.vercel.app";
 
 // MongoDB connection
 mongoose
@@ -28,7 +28,7 @@ app.use(
     origin: [
       FRONTEND_URL,
       "http://localhost:5173",
-      "https://gdg-cloud-jam.vercel.app/", // Add your Vercel URL
+      "https://gdg-cloud-jam.vercel.app", // Add your Vercel URL
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
