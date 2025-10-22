@@ -47,7 +47,9 @@ class CSVService {
 
   // Parse pipe-separated badges
   parseBadges(badgesString) {
-    if (!badgesString || badgesString === '') return [];
+    if (!badgesString || badgesString === '' || badgesString === '""') return [];
+    // Remove quotes if present
+    badgesString = badgesString.replace(/^"|"$/g, '');
     return badgesString
       .split('|')
       .map(badge => badge.trim())
@@ -56,11 +58,28 @@ class CSVService {
 
   // Parse pipe-separated labs/games
   parseLabs(labsString) {
-    if (!labsString || labsString === '') return [];
+    if (!labsString || labsString === '' || labsString === '""') return [];
+    // Remove quotes if present
+    labsString = labsString.replace(/^"|"$/g, '');
     return labsString
       .split('|')
       .map(lab => lab.trim())
       .filter(lab => lab.length > 0);
+  }
+
+  // Detect CSV format based on header or first data row
+  detectFormat(lines) {
+    if (lines.length < 2) return 'new'; // Default to new format
+    
+    const firstDataLine = lines[1];
+    const fields = this.parseCSVLine(firstDataLine);
+    
+    // New format has fewer columns and quoted fields
+    // Old format has 13 columns, new format has 10 columns
+    if (fields.length <= 10) {
+      return 'new';
+    }
+    return 'old';
   }
 
   // Process uploaded CSV file
@@ -70,7 +89,8 @@ class CSVService {
       updated: 0,
       created: 0,
       errors: [],
-      currentWeek: 1
+      currentWeek: 1,
+      format: 'unknown'
     };
 
     try {
@@ -81,6 +101,12 @@ class CSVService {
       if (lines.length < 2) {
         throw new Error('CSV file is empty or has no data rows');
       }
+      
+      // Detect format
+      const format = this.detectFormat(lines);
+      results.format = format;
+      
+      console.log(`📋 Detected CSV format: ${format}`);
       
       // Get current week
       const currentWeek = await this.getCurrentWeek();
@@ -95,20 +121,54 @@ class CSVService {
         try {
           const fields = this.parseCSVLine(dataLines[i]);
           
-          // CSV Column mapping
-          const name = fields[0]?.trim();
-          const email = fields[1]?.trim().toLowerCase();
-          const profileUrl = fields[2]?.trim();
-          const badges_completed = parseInt(fields[9]) || 0;
-          const badgesString = fields[10] || '';
-          const labs_completed = parseInt(fields[11]) || 0;
-          const labsString = fields[12] || '';
+          let name, email, profileUrl, badges_completed, badgesString, labs_completed, labsString;
+          
+          if (format === 'new') {
+            // New format column mapping:
+            // 0: User Name
+            // 1: User Email
+            // 2: Profile URL
+            // 3: Profile URL Status
+            // 4: Access Code Redemption Status
+            // 5: All Skill Badges & Games Completed
+            // 6: # of Skill Badges Completed
+            // 7: Names of Completed Skill Badges
+            // 8: # of Arcade Games Completed
+            // 9: Names of Completed Arcade Games
+            
+            name = fields[0]?.replace(/^"|"$/g, '').trim();
+            email = fields[1]?.replace(/^"|"$/g, '').trim().toLowerCase();
+            profileUrl = fields[2]?.replace(/^"|"$/g, '').trim();
+            badges_completed = parseInt(fields[6]?.replace(/^"|"$/g, '')) || 0;
+            badgesString = fields[7]?.replace(/^"|"$/g, '') || '';
+            labs_completed = parseInt(fields[8]?.replace(/^"|"$/g, '')) || 0;
+            labsString = fields[9]?.replace(/^"|"$/g, '') || '';
+          } else {
+            // Old format column mapping:
+            // 0: User Name
+            // 1: User Email
+            // 2: Profile URL
+            // 3-8: Other fields
+            // 9: # of Skill Badges Completed
+            // 10: Names of Completed Skill Badges
+            // 11: # of Arcade Games Completed
+            // 12: Names of Completed Arcade Games
+            
+            name = fields[0]?.trim();
+            email = fields[1]?.trim().toLowerCase();
+            profileUrl = fields[2]?.trim();
+            badges_completed = parseInt(fields[9]) || 0;
+            badgesString = fields[10] || '';
+            labs_completed = parseInt(fields[11]) || 0;
+            labsString = fields[12] || '';
+          }
           
           // Validate required fields
           if (!email || !name) {
             results.errors.push({
               row: i + 2,
-              error: 'Missing email or name'
+              error: 'Missing email or name',
+              data: { name, email }
             });
             continue;
           }
@@ -116,6 +176,8 @@ class CSVService {
           // Parse arrays
           const badges = this.parseBadges(badgesString);
           const labs = this.parseLabs(labsString);
+          
+          console.log(`Processing user: ${name} (${email}) - Badges: ${badges_completed}, Labs: ${labs_completed}`);
           
           // Find existing user by email
           const existingUser = await User.findOne({ email });
@@ -155,6 +217,8 @@ class CSVService {
             await existingUser.save();
             results.updated++;
             
+            console.log(`✅ Updated user: ${name}`);
+            
           } else {
             // Create new user - assign to house using round-robin
             const userCount = await User.countDocuments();
@@ -178,9 +242,12 @@ class CSVService {
             
             await newUser.save();
             results.created++;
+            
+            console.log(`✅ Created new user: ${name} (House ${house_id})`);
           }
           
         } catch (error) {
+          console.error(`❌ Error processing row ${i + 2}:`, error);
           results.errors.push({
             row: i + 2,
             error: error.message
@@ -188,9 +255,16 @@ class CSVService {
         }
       }
       
+      console.log(`\n📊 Processing complete:`);
+      console.log(`   Total rows: ${results.total}`);
+      console.log(`   Created: ${results.created}`);
+      console.log(`   Updated: ${results.updated}`);
+      console.log(`   Errors: ${results.errors.length}`);
+      
       return results;
       
     } catch (error) {
+      console.error('❌ Failed to process CSV:', error);
       throw new Error(`Failed to process CSV: ${error.message}`);
     }
   }
