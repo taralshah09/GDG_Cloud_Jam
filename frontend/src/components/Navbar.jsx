@@ -14,7 +14,7 @@ function Navbar() {
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
           <img src={gdgLogo} alt="GDG Logo" className="logo-icon" />
-          <span className="logo-text">GDGOC Study Jams</span>
+          <span className="logo-text">GDGoC LDCE Study Jams</span>
         </Link>
         
         <ul className="nav-menu">
