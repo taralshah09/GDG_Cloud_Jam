@@ -42,6 +42,7 @@ function Leaderboard() {
     }
   };
 
+
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
@@ -79,6 +80,11 @@ function Leaderboard() {
       <div className="leaderboard-header">
         <h1>🏆 Leaderboard</h1>
         <p className="subtitle">Track your progress and compete with peers</p>
+        <p className="last-update">
+          {/* Last updated: {new Date("2025-10-23T13:01:10.7452").toLocaleString()} */}
+          Last updated: 23/10/2025 1:01PM
+
+        </p>
       </div>
 
       <div className="filters-section">
