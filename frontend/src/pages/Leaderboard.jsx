@@ -83,7 +83,7 @@ function Leaderboard() {
         <p className="subtitle">Track your progress and compete with peers</p>
         <p className="last-update">
           {/* Last updated: {new Date("2025-10-23T13:01:10.7452").toLocaleString()} */}
-          Last updated: 24/10/2025 1:55PM
+          Last updated: 25/10/2025 1:51PM
 
         </p>
       </div>
