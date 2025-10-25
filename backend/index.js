@@ -9,6 +9,7 @@ import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL;
+
 const FRONTEND_URL =
   process.env.FRONTEND_URL || "https://gdg-cloud-jam.vercel.app";
 
@@ -16,7 +17,15 @@ const FRONTEND_URL =
 mongoose
   .connect(MONGO_URL)
   .then(async () => {
+    // Extract database name from connection URL
+    const dbName = mongoose.connection.db.databaseName;
+    if(MONGO_URL === "mongodb+srv://admin:admin@cluster0.twoheht.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"){
+      console.log("DB -> Sample data");
+    }else{
+      console.log("DB -> CloudJams_Leaderboard");
+    }
     console.log("✅ DB connected!");
+    console.log(`📊 Database: ${dbName}`);
   })
   .catch((err) => console.log("❌ Error: ", err.message));
 

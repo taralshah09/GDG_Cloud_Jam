@@ -71,6 +71,7 @@ class LeaderboardController {
       }
       
       // Fetch users
+      
       const users = await User.find(query)
         .sort(sortCriteria)
         .select('-__v')

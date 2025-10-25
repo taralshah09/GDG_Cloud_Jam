@@ -29,16 +29,34 @@ class CSVService {
   // Get current week based on program start date
   async getCurrentWeek() {
     try {
-      const startDate = await Config.getProgramStartDate();
+      // const startDate = await Config.getProgramStartDate();
+      // ⚠️ IMPORTANT: Use the actual program start date (October 20, 2025)
+      const startDate = new Date("2025-10-20T00:00:00.000Z");  // Using 2025 and midnight UTC
       const currentDate = new Date();
-      const diffTime = Math.abs(currentDate - startDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      if (diffDays <= 7) return 1;
-      if (diffDays <= 14) return 2;
-      if (diffDays <= 21) return 3;
-      if (diffDays <= 28) return 4;
-      return 4; // Cap at week 4
+      // Calculate difference in days
+      const diffTime = currentDate.getTime() - startDate.getTime();
+      
+      // If current date is BEFORE start date, return week 1
+      if (diffTime < 0) {
+        console.log('⚠️ Current date is before program start date. Defaulting to week 1.');
+        return 1;
+      }
+      
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      console.log(`📅 Days since program start: ${diffDays}`);
+      
+      // Week 1: Days 0-6 (first 7 days)
+      if (diffDays < 7) return 1;
+      // Week 2: Days 7-13 (next 7 days)
+      if (diffDays < 14) return 2;
+      // Week 3: Days 14-20 (next 7 days)
+      if (diffDays < 21) return 3;
+      // Week 4: Days 21-27 (next 7 days)
+      if (diffDays < 28) return 4;
+      // After 28 days, stay at week 4
+      return 4;
     } catch (error) {
       console.error('Error getting current week:', error);
       return 1;
@@ -48,7 +66,6 @@ class CSVService {
   // Parse pipe-separated badges
   parseBadges(badgesString) {
     if (!badgesString || badgesString === '' || badgesString === '""') return [];
-    // Remove quotes if present
     badgesString = badgesString.replace(/^"|"$/g, '');
     return badgesString
       .split('|')
@@ -59,7 +76,6 @@ class CSVService {
   // Parse pipe-separated labs/games
   parseLabs(labsString) {
     if (!labsString || labsString === '' || labsString === '""') return [];
-    // Remove quotes if present
     labsString = labsString.replace(/^"|"$/g, '');
     return labsString
       .split('|')
@@ -69,13 +85,11 @@ class CSVService {
 
   // Detect CSV format based on header or first data row
   detectFormat(lines) {
-    if (lines.length < 2) return 'new'; // Default to new format
+    if (lines.length < 2) return 'new';
     
     const firstDataLine = lines[1];
     const fields = this.parseCSVLine(firstDataLine);
     
-    // New format has fewer columns and quoted fields
-    // Old format has 13 columns, new format has 10 columns
     if (fields.length <= 10) {
       return 'new';
     }
@@ -124,18 +138,6 @@ class CSVService {
           let name, email, profileUrl, badges_completed, badgesString, labs_completed, labsString;
           
           if (format === 'new') {
-            // New format column mapping:
-            // 0: User Name
-            // 1: User Email
-            // 2: Profile URL
-            // 3: Profile URL Status
-            // 4: Access Code Redemption Status
-            // 5: All Skill Badges & Games Completed
-            // 6: # of Skill Badges Completed
-            // 7: Names of Completed Skill Badges
-            // 8: # of Arcade Games Completed
-            // 9: Names of Completed Arcade Games
-            
             name = fields[0]?.replace(/^"|"$/g, '').trim();
             email = fields[1]?.replace(/^"|"$/g, '').trim().toLowerCase();
             profileUrl = fields[2]?.replace(/^"|"$/g, '').trim();
@@ -144,16 +146,6 @@ class CSVService {
             labs_completed = parseInt(fields[8]?.replace(/^"|"$/g, '')) || 0;
             labsString = fields[9]?.replace(/^"|"$/g, '') || '';
           } else {
-            // Old format column mapping:
-            // 0: User Name
-            // 1: User Email
-            // 2: Profile URL
-            // 3-8: Other fields
-            // 9: # of Skill Badges Completed
-            // 10: Names of Completed Skill Badges
-            // 11: # of Arcade Games Completed
-            // 12: Names of Completed Arcade Games
-            
             name = fields[0]?.trim();
             email = fields[1]?.trim().toLowerCase();
             profileUrl = fields[2]?.trim();
@@ -183,7 +175,7 @@ class CSVService {
           const existingUser = await User.findOne({ email });
           
           if (existingUser) {
-            // Calculate weekly increments
+            // Calculate overall progress change
             const prevBadges = existingUser.badges_completed || 0;
             const prevLabs = existingUser.labs_completed || 0;
             
@@ -191,7 +183,7 @@ class CSVService {
             const labIncrement = Math.max(0, labs_completed - prevLabs);
             const totalIncrement = badgeIncrement + labIncrement;
             
-            // Update user data
+            // Update overall user data
             existingUser.name = name;
             existingUser.profileUrl = profileUrl;
             existingUser.badges_completed = badges_completed;
@@ -212,12 +204,20 @@ class CSVService {
               total_completed: currentWeekData.total_completed + totalIncrement
             };
             
-            existingUser.lastUpdated = new Date();
+            // --- 🕒 Handle progress timestamps ---
+            if (totalIncrement > 0) {
+              existingUser.lastUpdated = new Date();
+              existingUser.progressReachedAt = new Date();
+              console.log(`   ⏰ Progress timestamp updated for ${name} (+${totalIncrement} total)`);
+            }
             
             await existingUser.save();
             results.updated++;
             
-            console.log(`✅ Updated user: ${name}`);
+            // Update database last update date
+            await Config.updateDatabaseLastUpdateDate();
+            
+            console.log(`✅ Updated user: ${name} | Week ${currentWeek} snapshot: ${badges_completed + labs_completed} total`);
             
           } else {
             // Create new user - assign to house using round-robin
@@ -237,13 +237,18 @@ class CSVService {
                 badges_completed,
                 labs_completed,
                 total_completed: badges_completed + labs_completed
-              }
+              },
+              lastUpdated: new Date(),
+              progressReachedAt: new Date()
             });
             
             await newUser.save();
             results.created++;
             
-            console.log(`✅ Created new user: ${name} (House ${house_id})`);
+            // Update database last update date
+            await Config.updateDatabaseLastUpdateDate();
+            
+            console.log(`✅ Created new user: ${name} (House ${house_id}) | Week ${currentWeek} snapshot: ${badges_completed + labs_completed} total`);
           }
           
         } catch (error) {

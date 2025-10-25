@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+// Tracks cumulative progress at the END of each week (snapshot)
 const weeklyProgressSchema = new mongoose.Schema({
   badges_completed: { type: Number, default: 0 },
   labs_completed: { type: Number, default: 0 },
@@ -38,7 +39,7 @@ const userSchema = new mongoose.Schema({
     index: true
   },
   
-  // Overall progress
+  // Overall progress (cumulative total)
   badges_completed: {
     type: Number,
     default: 0,
@@ -58,7 +59,8 @@ const userSchema = new mongoose.Schema({
     type: String
   }],
   
-  // Weekly breakdown
+  // Weekly snapshots (cumulative progress at END of each week)
+  // These represent "what the user had completed by the end of this week"
   week1: {
     type: weeklyProgressSchema,
     default: () => ({ badges_completed: 0, labs_completed: 0, total_completed: 0 })
@@ -83,6 +85,13 @@ const userSchema = new mongoose.Schema({
   lastUpdated: {
     type: Date,
     default: Date.now
+  },
+  
+  // Timestamp tracking for tie-breaking
+  progressReachedAt: {
+    type: Date,
+    default: Date.now,
+    index: true
   }
 }, {
   timestamps: true
@@ -94,6 +103,7 @@ userSchema.index({ 'week1.total_completed': -1 });
 userSchema.index({ 'week2.total_completed': -1 });
 userSchema.index({ 'week3.total_completed': -1 });
 userSchema.index({ 'week4.total_completed': -1 });
+userSchema.index({ badges_completed: -1, labs_completed: -1, progressReachedAt: 1 });
 
 // Virtual for total completions
 userSchema.virtual('total_completed').get(function() {
