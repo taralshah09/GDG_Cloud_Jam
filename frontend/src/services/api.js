@@ -37,6 +37,14 @@ export const getProgramStartDate = () => {
   return api.get('/config/start-date');
 };
 
+export const getLastUpdateDate = () => {
+  return api.get('/config/last-update');
+};
+
+export const setLastUpdateDate = (lastUpdateDate) => {
+  return api.post('/config/last-update', { lastUpdateDate });
+};
+
 // Health check
 export const healthCheck = () => {
   return api.get('/health');

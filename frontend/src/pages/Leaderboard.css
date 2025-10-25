@@ -23,6 +23,13 @@
   color: #5f6368;
 }
 
+.last-update {
+  font-size: 0.85rem;
+  color: #80868b;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
 .filters-section {
   display: flex;
   gap: 1rem;

@@ -46,10 +46,13 @@ class LeaderboardController {
         const weekNum = parseInt(week);
         if (weekNum >= 1 && weekNum <= 4) {
           const weekKey = `week${weekNum}`;
+          // Week fields already contain incremental progress, so just sort by them
           sortCriteria = {
             [`${weekKey}.total_completed`]: -1,
-            badges_completed: -1,
-            labs_completed: -1
+            [`${weekKey}.badges_completed`]: -1,
+            [`${weekKey}.labs_completed`]: -1,
+            progressReachedAt: 1,  // Earlier achievers rank higher
+            lastUpdated: 1          // Fallback for deterministic ordering
           };
         } else {
           return res.status(400).json({
@@ -58,10 +61,12 @@ class LeaderboardController {
           });
         }
       } else {
-        // Sort by overall totals
+        // Sort by overall totals with timestamp tie-breaking
         sortCriteria = {
           badges_completed: -1,
-          labs_completed: -1
+          labs_completed: -1,
+          progressReachedAt: 1,  // Earlier achievers rank higher
+          lastUpdated: 1          // Fallback for deterministic ordering
         };
       }
       
@@ -180,13 +185,23 @@ class LeaderboardController {
         });
       }
       
-      // Calculate rank
-      const rank = await User.countDocuments({
+      // Calculate rank with proper tie-breaking
+      const higherBadges = await User.countDocuments({
         badges_completed: { $gt: user.badges_completed }
-      }) + await User.countDocuments({
+      });
+      
+      const sameBadgesHigherLabs = await User.countDocuments({
         badges_completed: user.badges_completed,
         labs_completed: { $gt: user.labs_completed }
-      }) + 1;
+      });
+      
+      const sameBadgesSameLabsEarlier = await User.countDocuments({
+        badges_completed: user.badges_completed,
+        labs_completed: user.labs_completed,
+        progressReachedAt: { $lt: user.progressReachedAt }
+      });
+      
+      const rank = higherBadges + sameBadgesHigherLabs + sameBadgesSameLabsEarlier + 1;
       
       const total_completed = user.badges_completed + user.labs_completed;
       
@@ -218,10 +233,17 @@ class LeaderboardController {
       for (let week = 1; week <= currentWeek; week++) {
         const weekKey = `week${week}`;
         
+        // Week fields already contain incremental progress, just sort by them
         const topUsers = await User.find()
-          .sort({ [`${weekKey}.total_completed`]: -1 })
+          .sort({ 
+            [`${weekKey}.total_completed`]: -1,
+            [`${weekKey}.badges_completed`]: -1,
+            [`${weekKey}.labs_completed`]: -1,
+            progressReachedAt: 1,
+            lastUpdated: 1
+          })
           .limit(10)
-          .select(`name email ${weekKey}`)
+          .select(`name email ${weekKey} progressReachedAt`)
           .lean();
         
         weeklyData.push({
@@ -230,7 +252,8 @@ class LeaderboardController {
             rank: index + 1,
             name: user.name,
             email: user.email,
-            ...user[weekKey]
+            ...user[weekKey],
+            progressReachedAt: user.progressReachedAt
           }))
         });
       }

@@ -12,4 +12,10 @@ router.post('/start-date', configController.setProgramStartDate.bind(configContr
 // GET /api/config/current-week - Get current week number
 router.get('/current-week', configController.getCurrentWeek.bind(configController));
 
+// GET /api/config/last-update - Get last update date
+router.get('/last-update', configController.getLastUpdateDate.bind(configController));
+
+// POST /api/config/last-update - Set last update date (manual update)
+router.post('/last-update', configController.setLastUpdateDate.bind(configController));
+
 export default router;

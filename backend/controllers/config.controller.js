@@ -67,7 +67,7 @@ class ConfigController {
   // GET current week
   async getCurrentWeek(req, res) {
     try {
-      const startDate = await Config.getProgramStartDate();
+      const startDate = new Date("2025-10-20T00:00:00.000Z");
       const currentDate = new Date();
       const diffTime = Math.abs(currentDate - startDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -94,6 +94,66 @@ class ConfigController {
       res.status(500).json({
         success: false,
         message: 'Failed to calculate current week',
+        error: error.message
+      });
+    }
+  }
+
+  // GET last update date
+  async getLastUpdateDate(req, res) {
+    try {
+      const lastUpdateDate = await Config.getLastUpdateDate();
+      
+      res.json({
+        success: true,
+        data: {
+          lastUpdateDate
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error fetching last update date:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch last update date',
+        error: error.message
+      });
+    }
+  }
+
+  // POST/UPDATE last update date (manual update)
+  async setLastUpdateDate(req, res) {
+    try {
+      const { lastUpdateDate } = req.body;
+      
+      let date;
+      if (lastUpdateDate) {
+        date = new Date(lastUpdateDate);
+        if (isNaN(date.getTime())) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid date format'
+          });
+        }
+      } else {
+        date = new Date();
+      }
+      
+      await Config.updateDatabaseLastUpdateDate(date);
+      
+      res.json({
+        success: true,
+        message: 'Last update date updated successfully',
+        data: {
+          lastUpdateDate: date
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error setting last update date:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to set last update date',
         error: error.message
       });
     }

@@ -20,7 +20,7 @@ PORT=5000
 NODE_ENV=development
 
 # CORS Configuration
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=https://gdg-cloud-jam.vercel.app/
 
 # Program Configuration
 PROGRAM_START_DATE=${new Date().toISOString().split('T')[0]}
