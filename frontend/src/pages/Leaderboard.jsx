@@ -42,8 +42,6 @@ function Leaderboard() {
     }
   };
 
-
-
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
@@ -64,7 +62,42 @@ function Leaderboard() {
     setFilters({ ...filters, week: e.target.value });
   };
 
-  const filteredLeaderboard = leaderboard.filter(user => 
+  // Get week-specific data for a user
+  const getWeekData = (user) => {
+    if (filters.week === 'all') {
+      return {
+        badges_completed: user.badges_completed,
+        labs_completed: user.labs_completed,
+        total_completed: user.total_completed
+      };
+    }
+    
+    const weekKey = `week${filters.week}`;
+    const weekData = user[weekKey];
+    
+    return {
+      badges_completed: weekData?.badges_completed || 0,
+      labs_completed: weekData?.labs_completed || 0,
+      total_completed: weekData?.total_completed || 0
+    };
+  };
+
+  // Process and re-rank leaderboard based on selected week
+  const processedLeaderboard = leaderboard.map(user => {
+    const weekData = getWeekData(user);
+    return {
+      ...user,
+      displayBadges: weekData.badges_completed,
+      displayLabs: weekData.labs_completed,
+      displayTotal: weekData.total_completed
+    };
+  }).sort((a, b) => b.displayTotal - a.displayTotal)
+    .map((user, index) => ({
+      ...user,
+      displayRank: index + 1
+    }));
+
+  const filteredLeaderboard = processedLeaderboard.filter(user => 
     user.email.toLowerCase().includes(searchEmail.toLowerCase()) ||
     user.name.toLowerCase().includes(searchEmail.toLowerCase())
   );
@@ -82,9 +115,7 @@ function Leaderboard() {
         <h1>🏆 Leaderboard</h1>
         <p className="subtitle">Track your progress and compete with peers</p>
         <p className="last-update">
-          {/* Last updated: {new Date("2025-10-23T13:01:10.7452").toLocaleString()} */}
-          Last updated: 26/10/2025 02:04 PM
-
+          Last updated: 27/10/2025 02:21 PM
         </p>
       </div>
 
@@ -155,10 +186,11 @@ function Leaderboard() {
                   </td>
                 </tr>
               ) : (
+
                 filteredLeaderboard.map((user) => (
-                  <tr key={user._id} className={getRankClass(user.rank)}>
+                  <tr key={user._id} className={getRankClass(user.displayRank)}>
                     <td className="rank-cell">
-                      <span className="rank-badge">{user.rank}</span>
+                      <span className="rank-badge">{user.displayRank}</span>
                     </td>
                     <td className="name-cell">
                       <div className="user-name">{user.name}</div>
@@ -169,17 +201,17 @@ function Leaderboard() {
                     </td>
                     <td>
                       <span className="stat-badge badges">
-                        🏆 {user.badges_completed}
+                        🏆 {user.displayBadges}
                       </span>
                     </td>
                     <td>
                       <span className="stat-badge labs">
-                        🎮 {user.labs_completed}
+                        🎮 {user.displayLabs}
                       </span>
                     </td>
                     <td>
                       <span className="total-badge">
-                        {user.total_completed}
+                        {user.displayTotal}
                       </span>
                     </td>
                     <td>
@@ -201,7 +233,9 @@ function Leaderboard() {
       )}
 
       <div className="leaderboard-footer">
-        <p>Showing {filteredLeaderboard.length} participant(s)</p>
+        <p>Showing {filteredLeaderboard.length} participant(s)
+          {filters.week !== 'all' && ` - Week ${filters.week} data`}
+        </p>
       </div>
     </div>
   );
