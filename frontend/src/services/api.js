@@ -51,8 +51,8 @@ export const healthCheck = () => {
   return api.get("/health");
 };
 
-export const allCompleted = () => {
-  return api.get("/leaderboard/all_completed");
+export const getAllComplete = () => {
+  return api.get("/leaderboard/all_complete");
 };
 
 export default api;
