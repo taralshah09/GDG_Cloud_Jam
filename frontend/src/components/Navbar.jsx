@@ -16,7 +16,7 @@ function Navbar() {
           <img src={gdgLogo} alt="GDG Logo" className="logo-icon" />
           <span className="logo-text">GDGoC LDCE Study Jams</span>
         </Link>
-        
+
         <ul className="nav-menu">
           <li className="nav-item">
             <Link to="/" className={`nav-link ${isActive('/')}`}>
@@ -36,6 +36,11 @@ function Navbar() {
           <li className="nav-item">
             <Link to="/weekly" className={`nav-link ${isActive('/weekly')}`}>
               Weekly Progress
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/all_completed" className={`nav-link ${isActive('/all_completed')}`}>
+              Hall of Fame
             </Link>
           </li>
         </ul>

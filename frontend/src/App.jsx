@@ -5,6 +5,7 @@ import Leaderboard from './pages/Leaderboard';
 import Houses from './pages/Houses';
 import WeeklyProgress from './pages/WeeklyProgress';
 import './App.css';
+import AllCompleted from './pages/AllCompleted';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/houses" element={<Houses />} />
             <Route path="/weekly" element={<WeeklyProgress />} />
+            <Route path="/all_completed" element={<AllCompleted />} />
           </Routes>
         </div>
       </div>
