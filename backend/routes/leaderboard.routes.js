@@ -15,4 +15,6 @@ router.get('/weekly', leaderboardController.getWeeklyComparison.bind(leaderboard
 // GET /api/leaderboard/user/:email - Get user details by email
 router.get('/user/:email', leaderboardController.getUserByEmail.bind(leaderboardController));
 
+router.get('/all_complete', leaderboardController.getAllComplete.bind(leaderboardController));
+
 export default router;
