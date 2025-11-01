@@ -15,7 +15,7 @@ function Leaderboard() {
   const getHouseName = (houseId) => {
     const houseNames = {
       1: 'Alpha',
-      2: 'Bravo', 
+      2: 'Bravo',
       3: 'Charlie',
       4: 'Delta',
       5: 'Enigma',
@@ -71,10 +71,10 @@ function Leaderboard() {
         total_completed: user.total_completed
       };
     }
-    
+
     const weekKey = `week${filters.week}`;
     const weekData = user[weekKey];
-    
+
     return {
       badges_completed: weekData?.badges_completed || 0,
       labs_completed: weekData?.labs_completed || 0,
@@ -97,7 +97,7 @@ function Leaderboard() {
       displayRank: index + 1
     }));
 
-  const filteredLeaderboard = processedLeaderboard.filter(user => 
+  const filteredLeaderboard = processedLeaderboard.filter(user =>
     user.email.toLowerCase().includes(searchEmail.toLowerCase()) ||
     user.name.toLowerCase().includes(searchEmail.toLowerCase())
   );
@@ -115,7 +115,7 @@ function Leaderboard() {
         <h1>🏆 Leaderboard</h1>
         <p className="subtitle">Track your progress and compete with peers</p>
         <p className="last-update">
-          Last updated: 31/10/2025 13:57 PM
+          Last updated: 01/11/2025 14:16 PM
         </p>
       </div>
 
@@ -139,8 +139,8 @@ function Leaderboard() {
           <select value={filters.week} onChange={handleWeekChange}>
             <option value="all">All Weeks</option>
             {[1, 2, 3, 4].map(week => (
-              <option 
-                key={week} 
+              <option
+                key={week}
                 value={week}
                 disabled={week > currentWeek}
               >
@@ -215,9 +215,9 @@ function Leaderboard() {
                       </span>
                     </td>
                     <td>
-                      <a 
-                        href={user.profileUrl} 
-                        target="_blank" 
+                      <a
+                        href={user.profileUrl}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="profile-link"
                       >
