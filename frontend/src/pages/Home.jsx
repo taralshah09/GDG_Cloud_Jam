@@ -119,7 +119,7 @@ function Home() {
         </Link>
       </div>
 
-      <div className="quick-links">
+      {/* <div className="quick-links">
         <Link to="/houses" className="quick-link-card">
           <div className="link-icon">🏠</div>
           <div className="link-title">House Rankings</div>
@@ -137,7 +137,7 @@ function Home() {
           <div className="link-title">Full Leaderboard</div>
           <div className="link-desc">See all participants</div>
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 }
