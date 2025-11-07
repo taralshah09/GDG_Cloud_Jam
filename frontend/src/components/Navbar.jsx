@@ -33,11 +33,11 @@ function Navbar() {
               Houses
             </Link>
           </li>
-          <li className="nav-item">
+          {/* <li className="nav-item">
             <Link to="/weekly" className={`nav-link ${isActive('/weekly')}`}>
               Weekly Progress
             </Link>
-          </li>
+          </li> */}
           <li className="nav-item">
             <Link to="/all_completed" className={`nav-link ${isActive('/all_completed')}`}>
               Hall of Fame

@@ -115,7 +115,7 @@ function Leaderboard() {
         <h1>🏆 Leaderboard</h1>
         <p className="subtitle">Track your progress and compete with peers</p>
         <p className="last-update">
-          Last updated: 06/11/2025 12:49 PM
+          Last updated: 07/11/2025 17:30 PM
         </p>
       </div>
 
@@ -134,7 +134,7 @@ function Leaderboard() {
           </select>
         </div>
 
-        <div className="filter-group">
+        {/* <div className="filter-group">
           <label>Week</label>
           <select value={filters.week} onChange={handleWeekChange}>
             <option value="all">All Weeks</option>
@@ -148,7 +148,7 @@ function Leaderboard() {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <div className="filter-group search-group">
           <label>Search</label>

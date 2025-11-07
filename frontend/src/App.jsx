@@ -17,7 +17,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/houses" element={<Houses />} />
-            <Route path="/weekly" element={<WeeklyProgress />} />
+            {/* <Route path="/weekly" element={<WeeklyProgress />} /> */}
             <Route path="/all_completed" element={<AllCompleted />} />
           </Routes>
         </div>
