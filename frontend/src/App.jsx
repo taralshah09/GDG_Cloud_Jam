@@ -13,13 +13,14 @@ function App() {
       <div className="App">
         <Navbar />
         <div className="main-content">
-          <Routes>
+          {/* <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/houses" element={<Houses />} />
             <Route path="/weekly" element={<WeeklyProgress />} />
             <Route path="/all_completed" element={<AllCompleted />} />
-          </Routes>
+          </Routes> */}
+          Site under maintenance
         </div>
       </div>
     </Router>
