@@ -169,6 +169,23 @@ class CSVService {
           const badges = this.parseBadges(badgesString);
           const labs = this.parseLabs(labsString);
           
+          // --- 🔒 Validate limits ---
+          const MAX_BADGES = 19;
+          const MAX_LABS = 1;
+          
+          // Check if values exceed limits
+          const exceedsLimits = badges_completed > MAX_BADGES || labs_completed > MAX_LABS;
+          
+          if (exceedsLimits) {
+            console.log(`⚠️ User ${name} (${email}) exceeds limits - Badges: ${badges_completed}/${MAX_BADGES}, Labs: ${labs_completed}/${MAX_LABS}. Skipping update.`);
+            results.errors.push({
+              row: i + 2,
+              error: `Exceeds limits (Badges: ${badges_completed}/${MAX_BADGES}, Labs: ${labs_completed}/${MAX_LABS})`,
+              data: { name, email, badges_completed, labs_completed }
+            });
+            continue;
+          }
+          
           console.log(`Processing user: ${name} (${email}) - Badges: ${badges_completed}, Labs: ${labs_completed}`);
           
           // Find existing user by email
