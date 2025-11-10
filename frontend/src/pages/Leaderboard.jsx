@@ -115,7 +115,7 @@ function Leaderboard() {
         <h1>🏆 Leaderboard</h1>
         <p className="subtitle">Track your progress and compete with peers</p>
         <p className="last-update">
-          Last updated: 09/11/2025 14:06 PM
+          Last updated: 10/11/2025 13:20 PM
         </p>
       </div>
 
